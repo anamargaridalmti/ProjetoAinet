@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\TshirtImage;
+use App\Models\Category;
 use Illuminate\Http\Request;
 
 class TshirtImageController extends Controller
@@ -10,9 +11,29 @@ class TshirtImageController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        //
+        $query = TshirtImage::whereNull('customer_id');
+
+        // Filtro por Nome ou Descrição 
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function ($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
+                    ->orWhere('description', 'like', "%{$search}%");
+            });
+        }
+
+        // Filtro por Categoria
+        if ($request->filled('category_id')) {
+            $query->where('category_id', $request->category_id);
+        }
+
+        $tshirts = $query->paginate(12);
+
+        $categories = Category::all();
+
+        return view('catalog.index', compact('tshirts', 'categories'));
     }
 
     /**

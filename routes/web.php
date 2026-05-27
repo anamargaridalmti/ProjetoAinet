@@ -1,11 +1,13 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Response;
 use App\Http\Controllers\ColorController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\ProfileController;
-
+use App\Http\Controllers\TshirtImageController;
 
 Route::view('/', 'home')->name('home');
 
@@ -26,6 +28,21 @@ Route::middleware(['auth', 'verified'])->group(function () {
     //Perfil do Cliente
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::put('/profile', [ProfileController::class, 'update'])->name('profile.update');
+});
+
+Route::get('/catalog', [TshirtImageController::class, 'index'])->name('catalog.index');
+
+Route::get('/images/catalog/{filename}', function ($filename) {
+    $path = 'tshirt_images/' . $filename;
+
+    if (!Storage::disk('public')->exists($path)) {
+        abort(404);
+    }
+
+    $file = Storage::disk('public')->get($path);
+    $type = Storage::disk('public')->mimeType($path);
+
+    return Response::make($file, 200)->header("Content-Type", $type);
 });
 
 require __DIR__ . '/settings.php';
