@@ -3,17 +3,29 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\ColorController;
 use App\Http\Controllers\CategoryController;
+use App\Http\Controllers\AuthController;
+use App\Http\Controllers\ProfileController;
 
 
 Route::view('/', 'home')->name('home');
 
 Route::resource('colors', ColorController::class);
 Route::resource('categories', CategoryController::class);
+Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
+Route::post('/login', [AuthController::class, 'login'])->name('login.post');
+Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
 Route::delete('categories/{category}/image', [CategoryController::class, 'destroyImage'])->name('categories.image.destroy');
 
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::view('dashboard', 'dashboard')->name('dashboard');
+});
+
+Route::middleware(['auth', 'verified'])->group(function () {
+
+    //Perfil do Cliente
+    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
+    Route::put('/profile', [ProfileController::class, 'update'])->name('profile.update');
 });
 
 require __DIR__ . '/settings.php';
