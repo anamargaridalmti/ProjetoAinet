@@ -52,9 +52,11 @@
             <div class="form-group">
                 <label for="photo">Fotografia / Avatar</label>
                 @if(Auth::user()->photo_url)
-                    <img src="{{ asset('storage/profiles/' . Auth::user()->photo_url) }}" alt="Avatar" style="width: 80px; height: 80px; border-radius: 50%; margin-bottom: 10px; display: block;">
+                    <img src="{{ url('img-profiles/' . Auth::user()->photo_url) }}?v={{ time() }}" alt="Avatar" style="width: 100px; height: 100px; border-radius: 50%; margin-bottom: 15px; display: block; object-fit: cover; border: 2px solid #ff4757;">
+                @else
+                    <div style="width: 100px; height: 100px; border-radius: 50%; background-color: #333; display: flex; align-items: center; justify-content: center; font-size: 40px; margin-bottom: 15px; border: 2px dashed #555;">👤</div>
                 @endif
-                <input id="photo" type="file" name="photo" accept="image/*">
+                <input id="photo" type="file" name="photo" accept="image/*" style="background: #2a2a2a; padding: 8px; border-radius: 4px; display: block; width: 100%; box-sizing: border-box;">
                 @error('photo') <div class="error">{{ $message }}</div> @enderror
             </div>
 

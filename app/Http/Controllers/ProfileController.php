@@ -35,16 +35,18 @@ class ProfileController extends Controller
         $user->name = $request->name;
         $user->email = $request->email;
 
-        // Trata o upload da fotografia (avatar)
+        //avatar
         if ($request->hasFile('photo')) {
-            // Apaga a foto antiga se existir
-            if ($user->photo_url) {
-                Storage::delete('public/profiles/' . $user->photo_url);
+            // Apaga a foto antiga se existir usando o disco público
+            if ($user->photo_url && Storage::disk('public')->exists('profiles/' . $user->photo_url)) {
+                Storage::disk('public')->delete('profiles/' . $user->photo_url);
             }
 
             $file = $request->file('photo');
             $filename = $user->id . '_' . time() . '.' . $file->getClientOriginalExtension();
-            $file->storeAs('public/profiles', $filename);
+
+            // Guarda automaticamente em storage/app/public/profiles/
+            $file->storeAs('profiles', $filename, 'public');
 
             $user->photo_url = $filename;
         }

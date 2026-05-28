@@ -45,4 +45,17 @@ Route::get('/images/catalog/{filename}', function ($filename) {
     return Response::make($file, 200)->header("Content-Type", $type);
 });
 
+Route::get('/img-profiles/{filename}', function ($filename) {
+    $path = 'profiles/' . $filename;
+
+    if (!Storage::disk('public')->exists($path)) {
+        abort(404);
+    }
+
+    $file = Storage::disk('public')->get($path);
+    $type = Storage::disk('public')->mimeType($path);
+
+    return response($file, 200)->header("Content-Type", $type);
+});
+
 require __DIR__ . '/settings.php';
