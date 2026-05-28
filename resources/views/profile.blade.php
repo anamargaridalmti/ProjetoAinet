@@ -19,6 +19,17 @@
 <body>
 
 <div class="container">
+    <div class="mb-6 flex items-center justify-between">
+        <flux:button 
+            icon="arrow-left" 
+            variant="subtle" 
+            :href="route('dashboard')" 
+            wire:navigate
+        >
+            Voltar
+        </flux:button>
+    </div>
+
     <div style="display: flex; justify-content: space-between; align-items: center;">
         <h2>O Meu Perfil (Cliente)</h2>
         <form method="POST" action="/logout">
@@ -32,7 +43,7 @@
     @endif
 
     <div class="section">
-        <h3>Alterar Dados Pessoais e Avatar</h3>
+        <h3>Alterar Dados Pessoais</h3>
         <form method="POST" action="{{ route('profile.update') }}" enctype="multipart/form-data">
             @csrf
             @method('PUT')

@@ -15,10 +15,16 @@
         @foreach ($categories as $cat)
             <tr class="border-b border-b-gray-400 dark:border-b-gray-500 hover:bg-gray-50 dark:hover:bg-zinc-700/50">
                 <td class="px-2 py-2">
-                    <img src="{{ $cat->imageUrlFull }}" class="w-12 h-12 object-cover rounded border bg-white">
+                    @if($cat->image_url && \Illuminate\Support\Facades\Storage::disk('public')->exists('categories/' . $cat->image_url))
+                        <img src="{{ url('img-categories/' . $cat->image_url) }}" style="width: 45px; height: 45px; object-fit: cover; border-radius: 6px; border: 1px solid #444;" alt="{{ $cat->name }}">
+                    @else
+                        <div style="width: 45px; height: 45px; background: #333; display: flex; align-items: center; justify-content: center; border-radius: 6px; font-size: 18px;">📁</div>
+                    @endif
                 </td>
                 
-                <td class="px-2 py-2 text-left font-medium">{{ $cat->name }}</td>
+                <td class="px-2 py-2 font-medium">
+                    {{ $cat->name }}
+                </td>
                 
                 @if($showView)
                     <td class="ps-2 px-0.5 w-10">
