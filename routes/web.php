@@ -8,6 +8,7 @@ use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\TshirtImageController;
+use App\Http\Controllers\AdminUserController;
 
 Route::view('/', 'home')->name('home');
 
@@ -56,6 +57,19 @@ Route::get('/img-profiles/{filename}', function ($filename) {
     $type = Storage::disk('public')->mimeType($path);
 
     return response($file, 200)->header("Content-Type", $type);
+});
+
+// Rotas Exclusivas do Administrador (G1)
+Route::middleware(['auth', 'verified'])->group(function () {
+
+    // Lista de Utilizadores e Filtros
+    Route::get('/admin/users', [AdminUserController::class, 'index'])->name('admin.users.index');
+
+    // Bloquear/Desbloquear Utilizador
+    Route::patch('/admin/users/{user}/toggle-block', [AdminUserController::class, 'toggleBlock'])->name('admin.users.toggle-block');
+
+    //delete
+    Route::delete('/admin/users/{user}', [AdminUserController::class, 'destroy'])->name('admin.users.destroy');
 });
 
 require __DIR__ . '/settings.php';
