@@ -70,6 +70,12 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     //delete
     Route::delete('/admin/users/{user}', [AdminUserController::class, 'destroy'])->name('admin.users.destroy');
+
+    // Mostrar formulário de criação de Staff
+    Route::get('/admin/users/create', [AdminUserController::class, 'create'])->name('admin.users.create');
+
+    // Submeter o formulário de criação
+    Route::post('/admin/users', [AdminUserController::class, 'store'])->name('admin.users.store');
 });
 
 require __DIR__ . '/settings.php';

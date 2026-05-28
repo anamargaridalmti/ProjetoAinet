@@ -4,9 +4,40 @@ namespace App\Http\Controllers;
 
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Validation\Rules;
 
 class AdminUserController extends Controller
 {
+    //formulário de criação de admin/funcionário
+    public function create()
+    {
+        return view('admin.users.create');
+    }
+
+    //guardar nome do membro na bd
+    public function store(Request $request)
+    {
+        $request->validate([
+            'name' => ['required', 'string', 'max:255'],
+            'email' => ['required', 'string', 'email', 'max:255', 'unique:users'],
+            'password' => ['required', 'confirmed', Rules\Password::defaults()],
+            'user_type' => ['required', 'in:C,F,A'], // C = Cliente, F = Funcionário, A = Admin
+        ]);
+
+        User::create([
+            'name' => $request->name,
+            'email' => $request->email,
+            'password' => Hash::make($request->password),
+            'user_type' => $request->user_type,
+        ]);
+
+        $user->markEmailAsVerified();
+
+        return redirect()->route('admin.users.index')->with('status', 'Utilizador criado com sucesso!');
+    }
+
+
     public function index(Request $request)
     {
 

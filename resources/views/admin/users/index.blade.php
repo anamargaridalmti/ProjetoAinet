@@ -31,6 +31,15 @@
 <div class="container">
     <h2>Painel Administrativo - Gestão de Utilizadores</h2>
 
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+        <p style="color: #aaa; margin: 0;">Gira os acessos, bloqueie ou remova contas de utilizadores.</p>
+        <a href="{{ route('admin.users.create') }}">
+            <button type="button" style="background-color: #2ed573; color: black; padding: 10px 20px; font-size: 14px;">
+                + Criar Membro do Staff
+            </button>
+        </a>
+    </div>
+
     @if(session('status'))
         <div class="alert-success">{{ session('status') }}</div>
     @endif
