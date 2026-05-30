@@ -93,12 +93,19 @@
                                     </flux:menu.item>
                                 @endif
 
-                                <form method="POST" action="{{ route('logout') }}" class="w-full">
+                                <form id="logout-form" method="POST" action="{{ route('logout') }}" class="hidden">
                                     @csrf
-                                    <flux:menu.item as="button" type="submit" icon="arrow-right-start-on-rectangle" class="w-full text-red-600 hover:text-red-700 cursor-pointer">
-                                        Terminar Sessão
-                                    </flux:menu.item>
                                 </form>
+
+                                <flux:menu.item 
+                                    as="button" 
+                                    type="submit" 
+                                    form="logout-form" 
+                                    icon="arrow-right-start-on-rectangle" 
+                                    class="w-full text-red-600 hover:text-red-700 cursor-pointer"
+                                >
+                                    Terminar Sessão
+                                </flux:menu.item>
                             </flux:menu>
                         </flux:dropdown>
                     @else

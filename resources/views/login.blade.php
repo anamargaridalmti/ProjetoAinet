@@ -3,7 +3,7 @@
 <head>
     @include('partials.head')
     <script>
-        // Sincronização em tempo real com o localStorage da tua Sidebar
+        // Sincronização em tempo real com o localStorage do tema global
         function applySavedTheme() {
             const savedTheme = localStorage.getItem('theme');
             if (savedTheme === 'dark' || (!savedTheme && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
@@ -24,13 +24,10 @@
             <x-app-logo class="h-12 w-auto" />
         </div>
         <flux:heading size="xl" class="font-bold tracking-tight text-zinc-900 dark:text-white">
-            Entrar na FunShirt
+            Criar Conta FunShirt
         </flux:heading>
         <flux:text class="mt-2 text-sm text-zinc-600 dark:text-zinc-400">
-            Ou 
-            <a href="{{ route('home') }}" class="font-medium text-zinc-900 dark:text-zinc-100 underline underline-offset-4 hover:text-zinc-700">
-                voltar para o catálogo público
-            </a>
+            Registe-se como cliente para personalizar e encomendar as suas t-shirts.
         </flux:text>
     </div>
 
@@ -47,8 +44,22 @@
                 </div>
             @endif
 
-            <form action="{{ route('login.post') }}" method="POST" class="space-y-6">
+            <form action="{{ route('register') }}" method="POST" class="space-y-6">
                 @csrf
+
+                <flux:field>
+                    <flux:label for="name">Nome Completo</flux:label>
+                    <flux:input 
+                        type="text" 
+                        name="name" 
+                        id="name" 
+                        value="{{ old('name') }}" 
+                        required 
+                        autofocus 
+                        placeholder="O teu nome completo"
+                        icon="user"
+                    />
+                </flux:field>
 
                 <flux:field>
                     <flux:label for="email">Endereço de Email</flux:label>
@@ -58,21 +69,13 @@
                         id="email" 
                         value="{{ old('email') }}" 
                         required 
-                        autofocus 
                         placeholder="exemplo@mail.pt"
                         icon="envelope"
                     />
                 </flux:field>
 
                 <flux:field>
-                    <div class="flex items-center justify-between">
-                        <flux:label for="password">Palavra-passe</flux:label>
-                        <div class="text-sm">
-                            <a href="{{ route('password.request') }}" class="font-medium text-zinc-900 dark:text-zinc-100 underline underline-offset-4 hover:text-zinc-700" wire:navigate>
-                                Esqueceu-se?
-                            </a>
-                        </div>
-                    </div>
+                    <flux:label for="password">Palavra-passe (mínimo 8 caracteres)</flux:label>
                     <flux:input 
                         type="password" 
                         name="password" 
@@ -83,12 +86,17 @@
                     />
                 </flux:field>
 
-                <div class="flex items-center justify-between">
-                    <label class="flex items-center gap-2 text-sm text-zinc-600 dark:text-zinc-400 select-none cursor-pointer">
-                        <input type="checkbox" name="remember" class="rounded border-zinc-300 dark:border-zinc-700 text-zinc-900 focus:ring-zinc-500 bg-white dark:bg-zinc-800">
-                        Lembrar-me neste dispositivo
-                    </label>
-                </div>
+                <flux:field>
+                    <flux:label for="password_confirmation">Confirmar Palavra-passe</flux:label>
+                    <flux:input 
+                        type="password" 
+                        name="password_confirmation" 
+                        id="password_confirmation" 
+                        required 
+                        placeholder="••••••••"
+                        icon="check-circle"
+                    />
+                </flux:field>
 
                 <div>
                     <flux:button 
@@ -96,10 +104,25 @@
                         variant="filled" 
                         class="w-full justify-center bg-zinc-900 hover:bg-zinc-800 text-white dark:bg-white dark:hover:bg-zinc-100 dark:text-zinc-900 font-semibold py-2.5 cursor-pointer"
                     >
-                        Entrar na Conta
+                        Criar a Minha Conta
                     </flux:button>
                 </div>
             </form>
+
+            <div class="mt-6 pt-6 border-t border-zinc-100 dark:border-zinc-800/80 text-center space-y-3">
+                <p class="text-xs text-zinc-500 dark:text-zinc-400">
+                    Já tem uma conta registada?
+                </p>
+                
+                <flux:button 
+                    variant="subtle" 
+                    :href="route('login')" 
+                    wire:navigate 
+                    class="w-full justify-center text-xs font-semibold"
+                >
+                    Voltar ao Login / Entrar
+                </flux:button>
+            </div>
 
         </div>
     </div>
