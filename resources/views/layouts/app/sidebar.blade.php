@@ -13,11 +13,18 @@
     </head>
     <body class="min-h-screen bg-white dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100">
         <flux:sidebar sticky collapsible="mobile" class="border-e border-zinc-200 bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-900">
+            
             <flux:sidebar.header>
                 <x-app-logo :href="route('home')" wire:navigate />
+                
+                <div class="ml-2">
+                    <h1 class="text-base font-bold text-zinc-900 dark:text-white tracking-tight">FunShirt</h1>
+                    <p class="text-xs text-zinc-500 dark:text-zinc-400">Admin Store</p>
+                </div>
+                
                 <flux:sidebar.collapse class="lg:hidden" />
             </flux:sidebar.header>
-
+        
             @if (count(session('cart', [])) > 0)
                 <flux:sidebar.nav variant="outline">
                     <div class="relative inline-flex items-center mr-4">

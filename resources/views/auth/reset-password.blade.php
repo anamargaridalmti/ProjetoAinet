@@ -24,13 +24,10 @@
             <x-app-logo class="h-12 w-auto" />
         </div>
         <flux:heading size="xl" class="font-bold tracking-tight text-zinc-900 dark:text-white">
-            Entrar na FunShirt
+            Definir Nova Palavra-passe
         </flux:heading>
         <flux:text class="mt-2 text-sm text-zinc-600 dark:text-zinc-400">
-            Ou 
-            <a href="{{ route('home') }}" class="font-medium text-zinc-900 dark:text-zinc-100 underline underline-offset-4 hover:text-zinc-700">
-                voltar para o catálogo público
-            </a>
+            Introduza a sua nova credencial de acesso.
         </flux:text>
     </div>
 
@@ -47,8 +44,10 @@
                 </div>
             @endif
 
-            <form action="{{ route('login.post') }}" method="POST" class="space-y-6">
+            <form action="{{ route('password.update') }}" method="POST" class="space-y-6">
                 @csrf
+
+                <input type="hidden" name="token" value="{{ $token }}">
 
                 <flux:field>
                     <flux:label for="email">Endereço de Email</flux:label>
@@ -56,23 +55,15 @@
                         type="email" 
                         name="email" 
                         id="email" 
-                        value="{{ old('email') }}" 
+                        value="{{ old('email', request()->email) }}" 
                         required 
-                        autofocus 
-                        placeholder="exemplo@mail.pt"
+                        placeholder="cliente@funshirt.com"
                         icon="envelope"
                     />
                 </flux:field>
 
                 <flux:field>
-                    <div class="flex items-center justify-between">
-                        <flux:label for="password">Palavra-passe</flux:label>
-                        <div class="text-sm">
-                            <a href="{{ route('password.request') }}" class="font-medium text-zinc-900 dark:text-zinc-100 underline underline-offset-4 hover:text-zinc-700" wire:navigate>
-                                Esqueceu-se?
-                            </a>
-                        </div>
-                    </div>
+                    <flux:label for="password">Nova Palavra-passe</flux:label>
                     <flux:input 
                         type="password" 
                         name="password" 
@@ -83,12 +74,17 @@
                     />
                 </flux:field>
 
-                <div class="flex items-center justify-between">
-                    <label class="flex items-center gap-2 text-sm text-zinc-600 dark:text-zinc-400 select-none cursor-pointer">
-                        <input type="checkbox" name="remember" class="rounded border-zinc-300 dark:border-zinc-700 text-zinc-900 focus:ring-zinc-500 bg-white dark:bg-zinc-800">
-                        Lembrar-me neste dispositivo
-                    </label>
-                </div>
+                <flux:field>
+                    <flux:label for="password_confirmation">Confirmar Nova Palavra-passe</flux:label>
+                    <flux:input 
+                        type="password" 
+                        name="password_confirmation" 
+                        id="password_confirmation" 
+                        required 
+                        placeholder="••••••••"
+                        icon="key"
+                    />
+                </flux:field>
 
                 <div>
                     <flux:button 
@@ -96,11 +92,10 @@
                         variant="filled" 
                         class="w-full justify-center bg-zinc-900 hover:bg-zinc-800 text-white dark:bg-white dark:hover:bg-zinc-100 dark:text-zinc-900 font-semibold py-2.5 cursor-pointer"
                     >
-                        Entrar na Conta
+                        Atualizar Palavra-passe
                     </flux:button>
                 </div>
             </form>
-
         </div>
     </div>
 

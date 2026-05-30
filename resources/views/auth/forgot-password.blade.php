@@ -24,19 +24,22 @@
             <x-app-logo class="h-12 w-auto" />
         </div>
         <flux:heading size="xl" class="font-bold tracking-tight text-zinc-900 dark:text-white">
-            Entrar na FunShirt
+            Recuperar Palavra-passe
         </flux:heading>
-        <flux:text class="mt-2 text-sm text-zinc-600 dark:text-zinc-400">
-            Ou 
-            <a href="{{ route('home') }}" class="font-medium text-zinc-900 dark:text-zinc-100 underline underline-offset-4 hover:text-zinc-700">
-                voltar para o catálogo público
-            </a>
+        <flux:text class="mt-2 text-sm text-zinc-600 dark:text-zinc-400 px-4">
+            Introduza o seu e-mail de registo. Enviaremos um link seguro para redefinir a sua senha.
         </flux:text>
     </div>
 
     <div class="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
         <div class="bg-white dark:bg-zinc-900 py-8 px-4 shadow-xl border border-zinc-200/80 dark:border-zinc-800/80 sm:rounded-xl sm:px-10">
             
+            @if (session('status'))
+                <div class="mb-4 p-3 bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-900/50 rounded-lg text-sm text-emerald-600 dark:text-emerald-400">
+                    {{ session('status') }}
+                </div>
+            @endif
+
             @if ($errors->any())
                 <div class="mb-4 p-3 bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-900/50 rounded-lg text-sm text-red-600 dark:text-red-400">
                     <ul class="list-disc pl-5 space-y-1">
@@ -47,7 +50,7 @@
                 </div>
             @endif
 
-            <form action="{{ route('login.post') }}" method="POST" class="space-y-6">
+            <form action="{{ route('password.email') }}" method="POST" class="space-y-6">
                 @csrf
 
                 <flux:field>
@@ -59,48 +62,30 @@
                         value="{{ old('email') }}" 
                         required 
                         autofocus 
-                        placeholder="exemplo@mail.pt"
+                        placeholder="cliente@mail.pt"
                         icon="envelope"
                     />
                 </flux:field>
 
-                <flux:field>
-                    <div class="flex items-center justify-between">
-                        <flux:label for="password">Palavra-passe</flux:label>
-                        <div class="text-sm">
-                            <a href="{{ route('password.request') }}" class="font-medium text-zinc-900 dark:text-zinc-100 underline underline-offset-4 hover:text-zinc-700" wire:navigate>
-                                Esqueceu-se?
-                            </a>
-                        </div>
-                    </div>
-                    <flux:input 
-                        type="password" 
-                        name="password" 
-                        id="password" 
-                        required 
-                        placeholder="••••••••"
-                        icon="key"
-                    />
-                </flux:field>
-
-                <div class="flex items-center justify-between">
-                    <label class="flex items-center gap-2 text-sm text-zinc-600 dark:text-zinc-400 select-none cursor-pointer">
-                        <input type="checkbox" name="remember" class="rounded border-zinc-300 dark:border-zinc-700 text-zinc-900 focus:ring-zinc-500 bg-white dark:bg-zinc-800">
-                        Lembrar-me neste dispositivo
-                    </label>
-                </div>
-
-                <div>
+                <div class="flex flex-col gap-3">
                     <flux:button 
                         type="submit" 
                         variant="filled" 
                         class="w-full justify-center bg-zinc-900 hover:bg-zinc-800 text-white dark:bg-white dark:hover:bg-zinc-100 dark:text-zinc-900 font-semibold py-2.5 cursor-pointer"
                     >
-                        Entrar na Conta
+                        Enviar Link de Recuperação
+                    </flux:button>
+
+                    <flux:button 
+                        :href="route('login')" 
+                        variant="subtle" 
+                        class="w-full justify-center"
+                        wire:navigate
+                    >
+                        Voltar ao Login
                     </flux:button>
                 </div>
             </form>
-
         </div>
     </div>
 
