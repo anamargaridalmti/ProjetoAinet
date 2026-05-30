@@ -13,4 +13,10 @@ class TshirtImage extends Model
     protected $table = 'tshirt_images';
 
     protected $fillable = ['customer_id', 'category_id', 'name', 'description', 'image_url', 'custom'];
+
+    public function category()
+    {
+        // Define que o campo 'category_id' nesta tabela liga ao 'id' da tabela 'categories'
+        return $this->belongsTo(Category::class, 'category_id');
+    }
 }

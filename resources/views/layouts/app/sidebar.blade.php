@@ -60,6 +60,10 @@
                     <flux:sidebar.item icon="tag" :href="route('categories.index')" :current="request()->routeIs('categories.index')" wire:navigate>
                         Categorias
                     </flux:sidebar.item>
+                    <!-- NOVO BOTÃO ADICIONADO: Gestão de estampas oficiais da loja -->
+                    <flux:sidebar.item icon="photo" :href="route('admin.tshirt-images.index')" :current="request()->routeIs('admin.tshirt-images.*')" wire:navigate>
+                        Estampagem
+                    </flux:sidebar.item>
                     <flux:sidebar.item :href="route('admin.users.index')" icon="users" :current="request()->routeIs('admin.users.*')" wire:navigate>
                         Utilizadores
                     </flux:sidebar.item>

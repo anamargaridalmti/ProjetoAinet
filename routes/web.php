@@ -129,6 +129,14 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::put('/admin/categories/{category}', [CategoryController::class, 'update'])->name('categories.update');
     Route::delete('/admin/categories/{category}', [CategoryController::class, 'destroy'])->name('categories.destroy');
     Route::delete('/admin/categories/{category}/image', [CategoryController::class, 'destroyImage'])->name('categories.image.destroy');
+
+    //G2: Catálogo de Imagens de T-shirt
+    Route::get('/admin/tshirt-images', [TshirtImageController::class, 'adminIndex'])->name('admin.tshirt-images.index');
+    Route::get('/admin/tshirt-images/create', [TshirtImageController::class, 'create'])->name('admin.tshirt-images.create');
+    Route::post('/admin/tshirt-images', [TshirtImageController::class, 'store'])->name('admin.tshirt-images.store');
+    Route::get('/admin/tshirt-images/{tshirt_image}/edit', [TshirtImageController::class, 'edit'])->name('admin.tshirt-images.edit');
+    Route::put('/admin/tshirt-images/{tshirt_image}', [TshirtImageController::class, 'update'])->name('admin.tshirt-images.update');
+    Route::delete('/admin/tshirt-images/{tshirt_image}', [TshirtImageController::class, 'destroy'])->name('admin.tshirt-images.destroy');
 });
 
 // --- Configurações Adicionais e Placeholders ---
