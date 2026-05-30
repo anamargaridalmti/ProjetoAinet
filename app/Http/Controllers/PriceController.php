@@ -4,62 +4,69 @@ namespace App\Http\Controllers;
 
 use App\Models\Price;
 use Illuminate\Http\Request;
+use Illuminate\View\View;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\Routing\Controllers\HasMiddleware;
+use Illuminate\Routing\Controllers\Middleware;
 
-class PriceController extends Controller
+class PriceController extends Controller implements HasMiddleware
 {
     /**
-     * Display a listing of the resource.
+     * Tranca o acesso exclusivo aos Administradores
      */
-    public function index()
+    public static function middleware(): array
     {
-        //
+        return [
+            new Middleware(function ($request, $next) {
+                if (!auth()->check() || auth()->user()->user_type !== 'A') {
+                    abort(403, 'Acesso restrito aos administradores.');
+                }
+                return $next($request);
+            }),
+        ];
     }
 
     /**
-     * Show the form for creating a new resource.
+     * Mostrar o formulário com os preços atuais
      */
-    public function create()
+    public function edit(): View
     {
-        //
+        // Vais buscar o único registo de configuração de preços
+        $price = Price::first() ?? new Price();
+        return view('admin.prices.edit', compact('price'));
     }
 
     /**
-     * Store a newly created resource in storage.
+     * Atualizar a tabela global de preços
      */
-    public function store(Request $request)
+    public function update(Request $request): RedirectResponse
     {
-        //
-    }
+        $request->validate([
+            'unit_price_catalog' => 'required|numeric|min:0',
+            'unit_price_own' => 'required|numeric|min:0',
+            'unit_price_catalog_discount' => 'required|numeric|min:0',
+            'unit_price_own_discount' => 'required|numeric|min:0',
+            'qty_discount' => 'required|integer|min:1',
+        ], [
+            'qty_discount.min' => 'A quantidade para desconto deve ser pelo menos 1 unidade.',
+        ]);
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(Price $price)
-    {
-        //
-    }
+        $price = Price::first();
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(Price $price)
-    {
-        //
-    }
+        // Se por acaso a tabela estiver vazia, cria o registo inicial
+        if (!$price) {
+            $price = new Price();
+        }
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, Price $price)
-    {
-        //
-    }
+        $price->unit_price_catalog = $request->unit_price_catalog;
+        $price->unit_price_own = $request->unit_price_own;
+        $price->unit_price_catalog_discount = $request->unit_price_catalog_discount;
+        $price->unit_price_own_discount = $request->unit_price_own_discount;
+        $price->qty_discount = $request->qty_discount;
+        $price->save();
 
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(Price $price)
-    {
-        //
+        return redirect()->route('admin.prices.edit')
+            ->with('alert-type', 'success')
+            ->with('alert-msg', 'Tabela global de preços atualizada com sucesso!');
     }
 }

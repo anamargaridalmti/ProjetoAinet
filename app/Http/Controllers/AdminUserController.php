@@ -29,8 +29,7 @@ class AdminUserController extends Controller
             $query->where('user_type', $request->type);
         }
 
-        // ALTERADO: Trocámos ->paginate(10) por ->get() para matar o bug do Javascript/Livewire
-        $users = $query->latest()->get();
+        $users = $query->latest()->paginate(15);
 
         return view('admin.users.index', compact('users'));
     }

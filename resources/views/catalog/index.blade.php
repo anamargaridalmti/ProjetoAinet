@@ -1,111 +1,114 @@
-<x-layouts::app :title="__('Catálogo de T-Shirts')">
+<x-layouts::app :title="__('Catálogo')">
     <div class="space-y-8">
         
-        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-            <div>
-                <flux:heading size="xl" class="font-bold tracking-tight text-zinc-900 dark:text-white">
-                    👕 Catálogo FunShirt
+        <!-- Cabeçalho do Catálogo -->
+        <div>
+            <div class="flex items-center gap-2">
+                <span class="text-2xl">👕</span>
+                <flux:heading size="xl" class="font-black tracking-tight text-zinc-900 dark:text-white">
+                    Catálogo FunShirt
                 </flux:heading>
-                <flux:text size="sm" class="text-zinc-500 dark:text-zinc-400 mt-0.5">
-                    Explore a nossa seleção de estampas exclusivas prontas para aplicar na sua t-shirt.
-                </flux:text>
             </div>
-            
-            <div class="text-sm">
-                @guest
-                    <flux:text size="sm" class="text-zinc-400">
-                        Deseja personalizar? <a href="{{ route('login') }}" class="font-semibold text-zinc-900 dark:text-zinc-100 underline underline-offset-4 hover:text-zinc-700">Faça Login</a>
-                    </flux:text>
-                @endguest
-            </div>
+            <flux:text size="sm" class="text-zinc-500 dark:text-zinc-400 mt-1">
+                Explore a nossa seleção de estampas exclusivas prontas para aplicar na sua t-shirt.
+            </flux:text>
         </div>
 
-        <flux:card class="p-4 bg-zinc-50 dark:bg-zinc-900/50 border border-zinc-200/80 dark:border-zinc-800/80">
-            <form method="GET" action="{{ route('catalog.index') }}" class="grid grid-cols-1 sm:grid-cols-3 gap-4 items-end">
+        <!-- 🔍 Zona de Filtros: Fundo Branco Suave com Borda Discreta no Modo Claro -->
+        <flux:card class="bg-white dark:bg-zinc-900 border border-zinc-200/80 dark:border-zinc-800 p-5 rounded-xl shadow-xs">
+            <form method="GET" action="{{ route('catalog.index') }}" class="grid grid-cols-1 md:grid-cols-12 gap-4 items-end">
                 
-                <flux:field>
-                    <flux:label for="search">Termo de Pesquisa</flux:label>
-                    <flux:input 
-                        type="text" 
-                        name="search" 
-                        id="search"
-                        value="{{ request('search') }}" 
-                        placeholder="Pesquisar por nome ou descrição..." 
-                        icon="magnifying-glass" 
-                    />
-                </flux:field>
+                <div class="md:col-span-5">
+                    <flux:field>
+                        <flux:label class="text-zinc-700 dark:text-zinc-300 font-medium mb-1">Termo de Pesquisa</flux:label>
+                        <flux:input type="text" name="search" value="{{ request('search') }}" placeholder="Pesquisar por nome ou descrição..." class="bg-zinc-50 dark:bg-zinc-950 border-zinc-200 dark:border-zinc-800" />
+                    </flux:field>
+                </div>
 
-                <flux:field>
-                    <flux:label for="category_id">Categoria do Produto</flux:label>
-                    <flux:select name="category_id" id="category_id" placeholder="Todas as Categorias">
-                        @foreach($categories as $cat)
-                            <flux:select.option value="{{ $cat->id }}">
-                                {{ $cat->name }}
-                            </flux:select.option>
-                        @endforeach
-                    </flux:select>
-                </flux:field>
+                <div class="md:col-span-4">
+                    <flux:field>
+                        <flux:label class="text-zinc-700 dark:text-zinc-300 font-medium mb-1">Categoria do Produto</flux:label>
+                        <flux:select name="category" placeholder="Todas as Categorias" class="bg-zinc-50 dark:bg-zinc-950 border-zinc-200 dark:border-zinc-800">
+                            <option value="">Todas as Categorias</option>
+                            @foreach($categories as $cat)
+                                <option value="{{ $cat->id }}" {{ request('category') == $cat->id ? 'selected' : '' }}>
+                                    {{ $cat->name }}
+                                </option>
+                            @endforeach
+                        </flux:select>
+                    </flux:field>
+                </div>
 
-                <div class="flex gap-2">
-                    <flux:button type="submit" variant="filled" class="w-full justify-center bg-zinc-900 hover:bg-zinc-800 text-white dark:bg-white dark:hover:bg-zinc-100 dark:text-zinc-900 font-semibold cursor-pointer">
+                <!-- 🔘 Botões Ajustados para Evitar Contrastes Gritantes -->
+                <div class="md:col-span-3 flex gap-2">
+                    <button type="submit" class="w-full inline-flex items-center justify-center px-4 py-2.5 bg-zinc-900 hover:bg-zinc-800 dark:bg-zinc-100 dark:hover:bg-zinc-200 text-white dark:text-zinc-900 text-sm font-semibold rounded-lg shadow-sm transition-colors cursor-pointer duration-150">
                         Filtrar Catálogo
-                    </flux:button>
+                    </button>
                     
-                    <flux:button href="{{ route('catalog.index') }}" variant="subtle" class="w-full justify-center" wire:navigate>
-                        Limpar
-                    </flux:button>
+                    @if(request()->filled('search') || request()->filled('category'))
+                        <a href="{{ route('catalog.index') }}" wire:navigate class="inline-flex items-center justify-center px-4 py-2.5 bg-zinc-100 hover:bg-zinc-200 dark:bg-zinc-800 dark:hover:bg-zinc-700 text-zinc-700 dark:text-zinc-200 text-sm font-medium rounded-lg transition-colors cursor-pointer">
+                            Limpar
+                        </a>
+                    @endif
                 </div>
             </form>
         </flux:card>
 
+        <!-- 🖼️ Grelha de Produtos: Cartões com Relevo em Fundo Off-White -->
         <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-            @forelse($tshirts as $tshirt)
-                <flux:card class="flex flex-col justify-between overflow-hidden p-0 group border border-zinc-200/60 dark:border-zinc-800/80 bg-white dark:bg-zinc-950 shadow-sm hover:shadow-md transition">
+            @forelse($tshirtImages as $image)
+                <div class="group bg-white dark:bg-zinc-900 rounded-xl border border-zinc-200/70 dark:border-zinc-800/80 overflow-hidden shadow-2xs hover:shadow-md transition-all duration-200 flex flex-col justify-between">
                     
-                    <div class="aspect-square bg-zinc-50 dark:bg-zinc-900/40 flex items-center justify-center overflow-hidden border-b border-zinc-100 dark:border-zinc-900 relative p-4">
-                        <img 
-                            src="{{ $tshirt->image_url ? url('/images/catalog/' . $tshirt->image_url) : url('/img-categories/default.png') }}" 
-                            alt="{{ $tshirt->name }}"
-                            class="max-w-full max-h-full object-contain group-hover:scale-105 transition duration-300"
-                            loading="lazy"
-                        />
-                        
-                        <span class="absolute top-3 left-3 px-2 py-0.5 rounded text-[10px] font-bold tracking-wide uppercase shadow-xs backdrop-blur-xs bg-zinc-900/80 text-white dark:bg-zinc-100/90 dark:text-zinc-900">
-                            📁 {{ $tshirt->category->name ?? 'Sem Categoria' }}
-                        </span>
-                    </div>
+                    <!-- Topo / Imagem -->
+                    <div class="p-4 space-y-3">
+                        <div class="relative w-full aspect-square bg-zinc-50 dark:bg-zinc-950/40 rounded-lg overflow-hidden border border-zinc-100 dark:border-zinc-800/50 p-4 flex items-center justify-center">
+                            
+                            <!-- Tag de Categoria -->
+                            <span class="absolute top-2 left-2 z-10 px-2 py-0.5 text-[10px] font-bold tracking-wider uppercase rounded bg-zinc-900/80 dark:bg-zinc-800/90 text-white">
+                                {{ $image->category->name ?? 'Sem Categoria' }}
+                            </span>
 
-                    <div class="p-4 space-y-3 flex-grow flex flex-col justify-between">
+                            <img 
+                                src="{{ url('/images/catalog/' . $image->image_url) }}" 
+                                alt="{{ $image->name }}" 
+                                class="max-w-full max-h-full object-contain transform group-hover:scale-105 transition-transform duration-200"
+                                onerror="this.src='https://placehold.co/300x300/f4f4f5/a1a1aa?text=FunShirt';"
+                            />
+                        </div>
+
                         <div>
-                            <div class="font-bold text-zinc-900 dark:text-white truncate text-base">
-                                {{ $tshirt->name }}
-                            </div>
-                            <p class="text-xs text-zinc-400 dark:text-zinc-500 line-clamp-2 mt-1 h-8 leading-relaxed">
-                                {{ $tshirt->description ?? 'Sem descrição detalhada configurada para esta estampa.' }}
+                            <h3 class="font-bold text-zinc-900 dark:text-white text-base truncate">
+                                {{ $image->name }}
+                            </h3>
+                            <p class="text-xs text-zinc-500 dark:text-zinc-400 line-clamp-2 mt-1 min-h-[32px]">
+                                {{ $image->description ?? 'Design exclusivo oficial da FunShirt.' }}
                             </p>
                         </div>
-
-                        <div class="pt-1 border-t border-zinc-100 dark:border-zinc-900">
-                            <flux:button variant="subtle" size="sm" class="w-full justify-center gap-2 cursor-not-allowed opacity-75">
-                                <flux:icon icon="shopping-bag" class="w-3.5 h-3.5" />
-                                Ver Opções
-                            </flux:button>
-                        </div>
                     </div>
-                </flux:card>
+
+                    <!-- Rodapé do Cartão / Ação -->
+                    <div class="px-4 pb-4 pt-2 border-t border-zinc-100 dark:border-zinc-800/60 bg-zinc-50/50 dark:bg-zinc-900/20">
+                        <button type="button" class="w-full inline-flex items-center justify-center gap-2 px-3 py-2 text-xs font-semibold rounded-lg border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-zinc-700 dark:text-zinc-200 hover:bg-zinc-50 dark:hover:bg-zinc-700 transition cursor-pointer">
+                            <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                            </svg>
+                            Ver Opções
+                        </button>
+                    </div>
+
+                </div>
             @empty
-                <div class="col-span-full py-16 text-center space-y-3 border border-dashed border-zinc-200 dark:border-zinc-800 rounded-xl">
-                    <flux:icon icon="photo" class="w-10 h-10 mx-auto text-zinc-300 dark:text-zinc-700" />
-                    <flux:heading size="lg" class="text-zinc-400 font-medium">Nenhuma estampa registada</flux:heading>
-                    <flux:text size="sm" class="text-zinc-400 max-w-sm mx-auto px-4">
-                        Não encontrámos t-shirts que correspondam aos filtros introduzidos.
-                    </flux:text>
+                <div class="col-span-full py-12 text-center">
+                    <p class="text-zinc-400 dark:text-zinc-500 font-medium">Nenhuma estampa corresponde aos filtros selecionados.</p>
                 </div>
             @endforelse
         </div>
 
-        <div class="mt-8 border-t border-zinc-100 dark:border-zinc-900 pt-4">
-            {{ $tshirts->links() }}
+        <!-- Paginação -->
+        <div class="mt-6">
+            {{ $tshirtImages->links() }}
         </div>
+
     </div>
 </x-layouts::app>

@@ -11,6 +11,7 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\TshirtImageController;
 use App\Http\Controllers\AdminUserController;
+use App\Http\Controllers\PriceController;
 
 // --- Rotas Públicas da Loja (Acessíveis a visitantes anónimos) ---
 Route::get('/', [TshirtImageController::class, 'index'])->name('home');
@@ -41,7 +42,7 @@ Route::get('/email/verify', function () {
 
 Route::get('/email/verify/{id}/{hash}', function (EmailVerificationRequest $request) {
     $request->fulfill();
-    return redirect()->route('dashboard')->with('status', 'E-mail verificado com sucesso!');
+    return redirect()->route('catalog.index')->with('status', 'E-mail verificado com sucesso!');
 })->middleware(['auth', 'signed'])->name('verification.verify');
 
 Route::post('/email/verification-notification', function (Request $request) {
@@ -137,6 +138,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/admin/tshirt-images/{tshirt_image}/edit', [TshirtImageController::class, 'edit'])->name('admin.tshirt-images.edit');
     Route::put('/admin/tshirt-images/{tshirt_image}', [TshirtImageController::class, 'update'])->name('admin.tshirt-images.update');
     Route::delete('/admin/tshirt-images/{tshirt_image}', [TshirtImageController::class, 'destroy'])->name('admin.tshirt-images.destroy');
+
+    // G2: Configuração Global de Preços da Loja
+    Route::get('/admin/prices', [PriceController::class, 'edit'])->name('admin.prices.edit');
+    Route::put('/admin/prices', [PriceController::class, 'update'])->name('admin.prices.update');
 });
 
 // --- Configurações Adicionais e Placeholders ---
