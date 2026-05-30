@@ -9,13 +9,14 @@ use Illuminate\Http\Request;
 class TshirtImageController extends Controller
 {
     /**
-     * Display a listing of the resource.
+     * Exibe a montra pública do catálogo com filtros e pesquisa (G2)
      */
     public function index(Request $request)
     {
+        // Puxamos apenas as imagens oficiais da loja (customer_id é null)
         $query = TshirtImage::whereNull('customer_id');
 
-        // Filtro por Nome ou Descrição 
+        // Filtro por Nome ou Descrição
         if ($request->filled('search')) {
             $search = $request->search;
             $query->where(function ($q) use ($search) {
@@ -29,8 +30,10 @@ class TshirtImageController extends Controller
             $query->where('category_id', $request->category_id);
         }
 
-        $tshirts = $query->paginate(12);
+        // Corrigido: Agora guarda em $tshirts para dar match com a tua vista
+        $tshirts = $query->latest()->paginate(12)->withQueryString();
 
+        // Puxamos todas as categorias para preencher o select do filtro
         $categories = Category::all();
 
         return view('catalog.index', compact('tshirts', 'categories'));

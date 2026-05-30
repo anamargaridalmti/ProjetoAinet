@@ -9,41 +9,14 @@ use Illuminate\Validation\Rules;
 
 class AdminUserController extends Controller
 {
-    //formulário de criação de admin/funcionário
-    public function create()
-    {
-        return view('admin.users.create');
-    }
-
-    //guardar nome do membro na bd
-    public function store(Request $request)
-    {
-        $request->validate([
-            'name' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'string', 'email', 'max:255', 'unique:users'],
-            'password' => ['required', 'confirmed', Rules\Password::defaults()],
-            'user_type' => ['required', 'in:C,F,A'], // C = Cliente, F = Funcionário, A = Admin
-        ]);
-
-        User::create([
-            'name' => $request->name,
-            'email' => $request->email,
-            'password' => Hash::make($request->password),
-            'user_type' => $request->user_type,
-        ]);
-
-        $user->markEmailAsVerified();
-
-        return redirect()->route('admin.users.index')->with('status', 'Utilizador criado com sucesso!');
-    }
-
-
+    /**
+     * Lista e filtra todos os utilizadores (G1)
+     */
     public function index(Request $request)
     {
-
         $query = User::query();
 
-        // Filtro por nome ou email
+        // Filtro de pesquisa (Nome ou Email)
         if ($request->filled('search')) {
             $query->where(function ($q) use ($request) {
                 $q->where('name', 'like', '%' . $request->search . '%')
@@ -51,25 +24,91 @@ class AdminUserController extends Controller
             });
         }
 
-        // Filtro por Tipo de Utilizador (C = Cliente, F = Funcionário, A = Admin)
+        // Filtro por tipo de utilizador
         if ($request->filled('type')) {
             $query->where('user_type', $request->type);
         }
 
-        // Paginação de 10 em 10 utilizadores
-        $users = $query->simplePaginate(10);
+        // ALTERADO: Trocámos ->paginate(10) por ->get() para matar o bug do Javascript/Livewire
+        $users = $query->latest()->get();
 
         return view('admin.users.index', compact('users'));
     }
 
-    // Método para Bloquear/Desbloquear
+    /**
+     * Formulário de criação de Staff (Funcionário / Administrador)
+     */
+    public function create()
+    {
+        return view('admin.users.create');
+    }
+
+    /**
+     * Grava um novo colaborador na BD (G1)
+     */
+    public function store(Request $request)
+    {
+        $request->validate([
+            'name' => ['required', 'string', 'max:255'],
+            'email' => ['required', 'string', 'email', 'max:255', 'unique:users'],
+            'password' => ['required', 'confirmed', Rules\Password::defaults()],
+            // O Admin apenas cria Funcionários (F) ou outros Administradores (A)
+            'user_type' => ['required', 'in:F,A'],
+            'gender' => ['required', 'in:M,F'],
+        ], [
+            'email.unique' => 'Este endereço de e-mail já está registado na plataforma.',
+            'user_type.in' => 'Através deste painel apenas é permitido criar Funcionários ou Administradores.',
+        ]);
+
+        // Captura o utilizador criado para podermos usar o método logo abaixo
+        $user = User::create([
+            'name' => $request->name,
+            'email' => $request->email,
+            'password' => Hash::make($request->password),
+            'user_type' => $request->user_type,
+            'gender' => $request->gender,
+            'blocked' => 0,
+            'photo_url' => null,
+            'custom' => null,
+        ]);
+
+        // Como a conta foi criada manualmente pelo Admin, marcamos o e-mail imediatamente como verificado
+        $user->markEmailAsVerified();
+
+        return redirect()->route('admin.users.index')->with('status', 'Colaborador criado com sucesso!');
+    }
+
+    /**
+     * Método para Bloquear/Desbloquear um utilizador (G1)
+     */
     public function toggleBlock(User $user)
     {
-        // Mudar o estado de bloqueado (se for 1 passa a 0, se for 0 passa a 1)
-        $user->blocked = !$user->blocked;
+        // Impede que o admin se bloqueie a si próprio
+        if ($user->id === auth()->id()) {
+            return redirect()->back()->with('error', 'Não pode bloquear a sua própria conta!');
+        }
+
+        // Inverte o estado de bloqueado (se for 1 passa a 0, se for 0 passa a 1)
+        $user->blocked = $user->blocked ? 0 : 1;
         $user->save();
 
         $statusText = $user->blocked ? 'bloqueado' : 'desbloqueado';
-        return redirect()->back()->with('status', "Utilizador {$user->name} foi {$statusText} com sucesso!");
+        return redirect()->back()->with('status', "O utilizador {$user->name} foi {$statusText} com sucesso!");
+    }
+
+    /**
+     * Remove uma conta utilizando Soft Delete (G1)
+     */
+    public function destroy(User $user)
+    {
+        // Impede que o admin se elimine a si próprio
+        if ($user->id === auth()->id()) {
+            return redirect()->back()->with('error', 'Não pode eliminar a sua própria conta!');
+        }
+
+        // Executa o soft delete (garante que a trait SoftDeletes está ativa no teu Model User)
+        $user->delete();
+
+        return redirect()->back()->with('status', "O utilizador {$user->name} foi removido com sucesso (histórico preservado).");
     }
 }

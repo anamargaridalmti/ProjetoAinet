@@ -1,64 +1,124 @@
-<!DOCTYPE html>
-<html lang="pt">
-<head>
-    <meta charset="UTF-8">
-    <title>FunShirt - Criar Staff</title>
-    <style>
-        body { background-color: #121212; color: white; font-family: sans-serif; padding: 30px; }
-        .container { max-width: 500px; margin: 0 auto; background-color: #1e1e1e; padding: 30px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.3); }
-        .form-group { margin-bottom: 20px; }
-        label { display: block; margin-bottom: 8px; color: #aaa; font-size: 14px; }
-        input[type="text"], input[type="email"], input[type="password"], select { width: 100%; padding: 10px; background: #121212; border: 1px solid #444; color: white; border-radius: 4px; box-sizing: border-box; }
-        .btn-submit { padding: 10px 20px; background-color: #2ed573; border: none; color: black; font-weight: bold; border-radius: 4px; cursor: pointer; width: 100%; font-size: 16px; }
-        .btn-cancel { display: block; text-align: center; margin-top: 15px; color: #aaa; text-decoration: none; font-size: 14px; }
-        .error-msg { color: #ff4757; font-size: 13px; margin-top: 5px; }
-    </style>
-</head>
-<body>
-
-<div class="container">
-    <h2>Criar Novo Membro do Staff</h2>
-    <p style="color: #888; font-size: 14px; margin-bottom: 25px;">Registe um novo Funcionário ou Administrador para a plataforma.</p>
-
-    <form method="POST" action="{{ route('admin.users.store') }}">
-        @csrf
-
-        <div class="form-group">
-            <label for="name">Nome Completo</label>
-            <input type="text" id="name" name="name" value="{{ old('name') }}" required>
-            @error('name') <div class="error-msg">{{ $message }}</div> @enderror
+<x-layouts::app :title="__('Criar Staff')">
+    <div class="max-w-2xl mx-auto space-y-6">
+        
+        <div class="flex items-center gap-4 mb-2">
+            <flux:button 
+                icon="arrow-left" 
+                variant="ghost" 
+                :href="route('admin.users.index')" 
+                wire:navigate 
+                aria-label="Voltar"
+                class="cursor-pointer"
+            />
+            <div>
+                <flux:heading size="xl" class="font-bold tracking-tight text-zinc-900 dark:text-white">
+                    Criar Novo Membro do Staff
+                </flux:heading>
+                <flux:text size="sm" class="text-zinc-500 dark:text-zinc-400">
+                    Registe um novo Funcionário ou Administrador para a equipa da FunShirt.
+                </flux:text>
+            </div>
         </div>
 
-        <div class="form-group">
-            <label for="email">Endereço de E-mail</label>
-            <input type="email" id="email" name="email" value="{{ old('email') }}" required>
-            @error('email') <div class="error-msg">{{ $message }}</div> @enderror
-        </div>
+        <flux:card class="p-6 bg-white dark:bg-zinc-900 border border-zinc-200/80 dark:border-zinc-800/80 shadow-md sm:rounded-xl">
+            <form method="POST" action="{{ route('admin.users.store') }}" class="space-y-5">
+                @csrf
 
-        <div class="form-group">
-            <label for="user_type">Perfil de Acesso</label>
-            <select id="user_type" name="user_type" required>
-                <option value="F" {{ old('user_type') == 'F' ? 'selected' : '' }}>Funcionário (Staff)</option>
-                <option value="A" {{ old('user_type') == 'A' ? 'selected' : '' }}>Administrador (Total)</option>
-            </select>
-            @error('user_type') <div class="error-msg">{{ $message }}</div> @enderror
-        </div>
+                <flux:field>
+                    <flux:label for="name">Nome Completo</flux:label>
+                    <flux:input 
+                        type="text" 
+                        id="name" 
+                        name="name" 
+                        value="{{ old('name') }}" 
+                        required 
+                        autofocus
+                        placeholder="Ex: Carlos Antunes"
+                        icon="user"
+                    />
+                    <flux:error name="name" />
+                </flux:field>
 
-        <div class="form-group">
-            <label for="password">Palavra-passe</label>
-            <input type="password" id="password" name="password" required>
-            @error('password') <div class="error-msg">{{ $message }}</div> @enderror
-        </div>
+                <flux:field>
+                    <flux:label for="email">Endereço de E-mail</flux:label>
+                    <flux:input 
+                        type="email" 
+                        id="email" 
+                        name="email" 
+                        value="{{ old('email') }}" 
+                        required 
+                        placeholder="colaborador@funshirt.com"
+                        icon="envelope"
+                    />
+                    <flux:error name="email" />
+                </flux:field>
 
-        <div class="form-group">
-            <label for="password_confirmation">Confirmar Palavra-passe</label>
-            <input type="password" id="password_confirmation" name="password_confirmation" required>
-        </div>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <flux:field>
+                        <flux:label for="user_type">Perfil de Acesso</flux:label>
+                        <flux:select id="user_type" name="user_type" placeholder="Selecione o perfil..." required>
+                            <flux:select.option value="F" {{ old('user_type') == 'F' ? 'selected' : '' }}>Funcionário (Staff)</flux:select.option>
+                            <flux:select.option value="A" {{ old('user_type') == 'A' ? 'selected' : '' }}>Administrador (Total)</flux:select.option>
+                        </flux:select>
+                        <flux:error name="user_type" />
+                    </flux:field>
 
-        <button type="submit" class="btn-submit">Gravar Conta</button>
-        <a href="{{ route('admin.users.index') }}" class="btn-cancel">Cancelar e Voltar</a>
-    </form>
-</div>
+                    <flux:field>
+                        <flux:label for="gender">Género</flux:label>
+                        <flux:select id="gender" name="gender" placeholder="Selecione o género..." required>
+                            <flux:select.option value="M" {{ old('gender') == 'M' ? 'selected' : '' }}>Masculino</flux:select.option>
+                            <flux:select.option value="F" {{ old('gender') == 'F' ? 'selected' : '' }}>Feminino</flux:select.option>
+                        </flux:select>
+                        <flux:error name="gender" />
+                    </flux:field>
+                </div>
 
-</body>
-</html>
+                <flux:separator class="my-2" />
+
+                <flux:field>
+                    <flux:label for="password">Palavra-passe Provisória</flux:label>
+                    <flux:input 
+                        type="password" 
+                        id="password" 
+                        name="password" 
+                        required 
+                        placeholder="Mínimo 3 caracteres"
+                        icon="key"
+                    />
+                    <flux:error name="password" />
+                </flux:field>
+
+                <flux:field>
+                    <flux:label for="password_confirmation">Confirmar Palavra-passe</flux:label>
+                    <flux:input 
+                        type="password" 
+                        id="password_confirmation" 
+                        name="password_confirmation" 
+                        required 
+                        placeholder="Repita a palavra-passe"
+                        icon="key"
+                    />
+                </flux:field>
+
+                <div class="flex items-center justify-end gap-3 pt-4 border-t border-zinc-100 dark:border-zinc-800">
+                    <flux:button 
+                        :href="route('admin.users.index')" 
+                        variant="ghost" 
+                        wire:navigate
+                        class="cursor-pointer"
+                    >
+                        Cancelar
+                    </flux:button>
+                    
+                    <flux:button 
+                        type="submit" 
+                        variant="filled" 
+                        class="bg-zinc-900 hover:bg-zinc-800 text-white dark:bg-white dark:hover:bg-zinc-100 dark:text-zinc-900 font-semibold cursor-pointer"
+                    >
+                        Gravar Conta
+                    </flux:button>
+                </div>
+            </form>
+        </flux:card>
+    </div>
+</x-layouts::app>

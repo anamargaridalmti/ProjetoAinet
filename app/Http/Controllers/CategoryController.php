@@ -5,9 +5,27 @@ namespace App\Http\Controllers;
 use App\Models\Category;
 use App\Http\Requests\CategoryFormRequest;
 use Illuminate\Http\Request;
+use Illuminate\Routing\Controllers\HasMiddleware;
+use Illuminate\Routing\Controllers\Middleware;
 
-class CategoryController extends Controller
+class CategoryController extends Controller implements HasMiddleware
 {
+    /**
+     * Define os middlewares que protegem este controlador de forma nativa no Laravel moderno
+     */
+    public static function middleware(): array
+    {
+        return [
+            // Garante que apenas utilizadores administradores ('A') acedem a qualquer método
+            new Middleware(function ($request, $next) {
+                if (!auth()->check() || auth()->user()->user_type !== 'A') {
+                    abort(403, 'Acesso restrito aos administradores da plataforma.');
+                }
+                return $next($request);
+            }),
+        ];
+    }
+
     /**
      * Listar todas as categorias (Passo 2 - ordenar por name)
      */
@@ -16,7 +34,8 @@ class CategoryController extends Controller
         // Vai buscar as categorias ordenadas por nome com paginação
         $categories = Category::orderBy('name')->paginate(20);
 
-        return view('categories.index', compact('categories'));
+        // Aponta para a pasta admin que criaste
+        return view('admin.categories.index', compact('categories'));
     }
 
     /**
@@ -24,8 +43,9 @@ class CategoryController extends Controller
      */
     public function create()
     {
-        $category = new Category(); // Objeto vazio para o fields.blade.php
-        return view('categories.create', compact('category'));
+        $category = new Category(); // Objeto vazio para os fields
+        // Ajustado: Aponta para a subpasta admin
+        return view('admin.categories.create', compact('category'));
     }
 
     /**
@@ -52,11 +72,11 @@ class CategoryController extends Controller
     }
 
     /**
-     * Mostrar os detalhes de uma categoria específica
+     * Mostrar os detalhes de uma categoria específica (Opcional)
      */
     public function show(Category $category)
     {
-        return view('categories.show', compact('category'));
+        return view('admin.categories.show', compact('category'));
     }
 
     /**
@@ -64,7 +84,8 @@ class CategoryController extends Controller
      */
     public function edit(Category $category)
     {
-        return view('categories.edit', compact('category'));
+        // Ajustado: Aponta para a subpasta admin
+        return view('admin.categories.edit', compact('category'));
     }
 
     /**
@@ -85,7 +106,7 @@ class CategoryController extends Controller
 
         return redirect()
             ->route('categories.index')
-            ->with('success', 'Categoria atualizada com sucesso!');
+            ->with('success', 'Categoria actualizada com sucesso!');
     }
 
     /**

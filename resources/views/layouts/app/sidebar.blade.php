@@ -3,7 +3,6 @@
     <head>
         @include('partials.head')
         <script>
-            // Executa imediatamente antes de renderizar para evitar flickering
             if (localStorage.getItem('theme') === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
                 document.documentElement.classList.add('dark');
             } else {
@@ -24,13 +23,15 @@
                 
                 <flux:sidebar.collapse class="lg:hidden" />
             </flux:sidebar.header>
-        
-            @if (count(session('cart', [])) > 0)
+
+            @php $cartCount = count(session('cart', [])); @endphp
+
+            @if($cartCount > 0)
                 <flux:sidebar.nav variant="outline">
                     <div class="relative inline-flex items-center mr-4">
                         <div class="-top-0.5 absolute left-6 z-10">
                             <p class="flex p-3 h-3 w-3 items-center justify-center rounded-full bg-red-500 text-xs text-white">
-                                {{ count(session('cart', [])) }}
+                                {{ $cartCount }}
                             </p>
                         </div>
                         <flux:navlist.item icon="shopping-cart" icon:variant="solid" :href="route('cart.show')" :current="request()->routeIs('cart.show')" wire:navigate>
@@ -45,7 +46,7 @@
                     <flux:sidebar.item icon="home" :href="route('dashboard')" :current="request()->routeIs('dashboard')" wire:navigate>
                         {{ __('Dashboard') }}
                     </flux:sidebar.item>
-                    <flux:sidebar.item icon="squares-2x2" :href="route('home')" :current="request()->routeIs('home')" wire:navigate>
+                    <flux:sidebar.item :href="route('catalog.index')" icon="squares-2x2" :current="request()->routeIs('catalog.*')" wire:navigate>
                         Catálogo
                     </flux:sidebar.item>
                 </flux:sidebar.group>
@@ -58,6 +59,9 @@
                     </flux:sidebar.item>
                     <flux:sidebar.item icon="tag" :href="route('categories.index')" :current="request()->routeIs('categories.index')" wire:navigate>
                         Categorias
+                    </flux:sidebar.item>
+                    <flux:sidebar.item :href="route('admin.users.index')" icon="users" :current="request()->routeIs('admin.users.*')" wire:navigate>
+                        Utilizadores
                     </flux:sidebar.item>
                 </flux:sidebar.group>
             </flux:sidebar.nav>
@@ -106,11 +110,9 @@
 
         {{ $slot }}
 
-        @persist('toast')
-            <flux:toast.group>
-                <flux:toast />
-            </flux:toast.group>
-        @endpersist
+        <flux:toast.group>
+            <flux:toast />
+        </flux:toast.group>
 
         @fluxScripts
 

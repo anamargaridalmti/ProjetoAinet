@@ -2,54 +2,36 @@
 
 namespace App\Http\Requests;
 
-use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 
 class ColorFormRequest extends FormRequest
 {
-    /**
-     * Determine if the user is authorized to make this request.
-     */
     public function authorize(): bool
     {
         return true;
     }
 
-    /**
-     * Get the validation rules that apply to the request.
-     *
-     * @return array<string, ValidationRule|array<mixed>|string>
-     */
     public function rules(): array
     {
-        $rules = [
-            'name' => 'required|string|max:255',
-            'name_pt' => 'required|string|max:255',
-            'type' => 'required|in:Degree,Master,TESP',
-            'semesters' => 'required|integer|between:1,10',
-            'ECTS' => 'required|integer|min:1',
-            'places' => 'required|integer|min:0',
-            'contact' => 'required|email',
-            'objectives' => 'required|string',
-            'objectives_pt' => 'required|string',
-        ];
-        if (strtolower($this->getMethod()) == 'post') {
-            // This will merge 2 arrays:
-            // (adds the "code" rule to the $rules array)
-            $rules = array_merge($rules, [
-                'code' => 'required|string|max:20|unique:Colors,code',
-            ]);
-        }
-        return $rules;
-    }
+        $imageRule = $this->isMethod('post') ? 'required|image|max:2048' : 'nullable|image|max:2048';
 
+        return [
+            'code' => $this->isMethod('post') ? 'required|string|size:6|unique:colors,code' : 'nullable',
+            'name' => 'required|string|max:255',
+            'tshirt_image' => $imageRule,
+        ];
+    }
 
     public function messages(): array
     {
         return [
-            'ECTS.required' => 'ECTS is required',
-            'ECTS.integer' => 'ECTS must be an integer',
-            'ECTS.min' => 'ECTS must be equal or greater that 1',
+            'code.required' => 'O código hexadecimal da cor é obrigatório.',
+            'code.size' => 'O código deve ter exatamente 6 caracteres (sem o #).',
+            'code.unique' => 'Este código de cor já se encontra registado.',
+            'name.required' => 'O nome descritivo da cor é obrigatório.',
+            'tshirt_image.required' => 'É obrigatório fazer o upload do ficheiro de imagem da t-shirt base.',
+            'tshirt_image.image' => 'O ficheiro selecionado tem de ser uma imagem válida.',
+            'tshirt_image.max' => 'A imagem da t-shirt base não pode ter mais de 2MB.',
         ];
     }
 }
