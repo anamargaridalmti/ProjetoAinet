@@ -12,6 +12,7 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\TshirtImageController;
 use App\Http\Controllers\AdminUserController;
 use App\Http\Controllers\PriceController;
+use App\Http\Controllers\CartController;
 
 // --- Rotas Públicas da Loja (Acessíveis a visitantes anónimos) ---
 Route::get('/', [TshirtImageController::class, 'index'])->name('home');
@@ -34,6 +35,13 @@ Route::get('/categories/{category}', [CategoryController::class, 'show'])->name(
 Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
 Route::post('/login', [AuthController::class, 'login'])->name('login.post');
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
+
+// --- Rotas do Carrinho de Compras --- //
+Route::get('/cart', [CartController::class, 'show'])->name('cart.show');
+Route::post('/cart/add', [CartController::class, 'add'])->name('cart.add');
+Route::patch('/cart/update/{key}', [CartController::class, 'update'])->name('cart.update');
+Route::delete('/cart/remove/{key}', [CartController::class, 'destroy'])->name('cart.remove');
+Route::delete('/cart/clear', [CartController::class, 'clear'])->name('cart.clear');
 
 // --- Verificação de E-mail & Reset de Passwords ---
 Route::get('/email/verify', function () {
@@ -145,5 +153,5 @@ Route::middleware(['auth', 'verified'])->group(function () {
 });
 
 // --- Configurações Adicionais e Placeholders ---
-Route::view('/cart', 'home')->name('cart.show');
+//Route::view('/cart', 'home')->name('cart.show');
 require __DIR__ . '/settings.php';
