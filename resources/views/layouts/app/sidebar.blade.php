@@ -91,6 +91,12 @@
                                     <flux:menu.item :href="route('profile.edit')" icon="user" wire:navigate class="cursor-pointer">
                                         O Meu Perfil
                                     </flux:menu.item>
+
+                                    @if($user->user_type === 'C')
+                                        <flux:menu.item :href="route('customer.tshirt-images.index')" icon="photo" wire:navigate class="cursor-pointer">
+                                            As Minhas Imagens
+                                        </flux:menu.item>
+                                    @endif
                                 @endif
 
                                 <form id="logout-form" method="POST" action="{{ route('logout') }}" class="hidden">
@@ -141,6 +147,10 @@
                             </flux:sidebar.item>
                             <flux:sidebar.item :href="route('admin.users.index')" icon="users" :current="request()->routeIs('admin.users.*')" wire:navigate>
                                 Utilizadores
+                            </flux:sidebar.item>
+                            
+                            <flux:sidebar.item icon="chart-bar" :href="route('admin.statistics')" :current="request()->routeIs('admin.statistics')" wire:navigate>
+                                Estatísticas
                             </flux:sidebar.item>
                         </flux:sidebar.group>
                     </flux:sidebar.nav>

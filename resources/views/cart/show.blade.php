@@ -37,12 +37,11 @@
                             <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                                 
                                 <div class="flex items-center gap-4">
-                                    <div class="w-16 h-16 rounded-lg bg-zinc-100 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 flex items-center justify-center p-1 overflow-hidden shrink-0">
-                                        @if($item['customer_id'])
-                                            <img src="{{ url('/img-profiles/' . $item['image_url']) }}" alt="Personalizada" class="w-full h-full object-contain">
-                                        @else
-                                            <img src="{{ url('/images/catalog/' . $item['image_url']) }}" alt="Catálogo" class="w-full h-full object-contain">
-                                        @endif
+                                    <div class="shrink-0 flex items-center justify-center">
+                                        <x-tshirt-preview 
+                                            :colorCode="$item['color_code']" 
+                                            :imageUrl="$item['image_url']" 
+                                            :customerId="$item['customer_id'] ?? null" />
                                     </div>
                                     <div>
                                         <flux:heading size="md" class="font-bold text-zinc-900 dark:text-white">{{ $item['name'] }}</flux:heading>

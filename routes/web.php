@@ -42,7 +42,7 @@ Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
 // --- Rotas do Carrinho de Compras ---
 // The cart page is a Livewire full-page component for reactive, server-side interactivity.
-Route::livewire('/cart', CartPage::class)->name('cart.show');
+Route::get('/cart', \App\Livewire\Cart\CartPage::class)->name('cart.show');
 Route::post('/cart/add', [CartController::class, 'add'])->name('cart.add');
 Route::patch('/cart/update/{key}', [CartController::class, 'update'])->name('cart.update');
 Route::delete('/cart/remove/{key}', [CartController::class, 'destroy'])->name('cart.remove');
@@ -92,6 +92,17 @@ Route::middleware(['auth', 'verified'])->group(function () {
     // G4: Histórico de Encomendas
     Route::get('/orders', [OrderController::class, 'index'])->name('orders.index');
 
+    // G5: Gestão de Imagens Personalizadas por parte do Cliente
+    Route::get('/customer/tshirt-images', [\App\Http\Controllers\CustomerTshirtImageController::class, 'index'])->name('customer.tshirt-images.index');
+    Route::get('/customer/tshirt-images/create', [\App\Http\Controllers\CustomerTshirtImageController::class, 'create'])->name('customer.tshirt-images.create');
+    Route::post('/customer/tshirt-images', [\App\Http\Controllers\CustomerTshirtImageController::class, 'store'])->name('customer.tshirt-images.store');
+    Route::get('/customer/tshirt-images/{tshirt_image}/edit', [\App\Http\Controllers\CustomerTshirtImageController::class, 'edit'])->name('customer.tshirt-images.edit');
+    Route::put('/customer/tshirt-images/{tshirt_image}', [\App\Http\Controllers\CustomerTshirtImageController::class, 'update'])->name('customer.tshirt-images.update');
+    Route::delete('/customer/tshirt-images/{tshirt_image}', [\App\Http\Controllers\CustomerTshirtImageController::class, 'destroy'])->name('customer.tshirt-images.destroy');
+
+    // Rota de Streaming Seguro para Imagens Privadas (Dono, Funcionários e Admins)
+    Route::get('/images/private/{filename}', [\App\Http\Controllers\CustomerTshirtImageController::class, 'showPrivateImage'])->name('images.private');
+
     // G6: Download do Recibo em PDF (autorização via OrderPolicy@downloadReceipt)
     Route::get('/orders/{order}/receipt', [OrderController::class, 'downloadReceipt'])->name('orders.receipt.download');
 });
@@ -105,7 +116,7 @@ Route::get('/images/catalog/{filename}', function ($filename) {
     $file = Storage::disk('public')->get($path);
     $type = Storage::disk('public')->mimeType($path);
     return Response::make($file, 200)->header("Content-Type", $type);
-});
+})->name('images.catalog'); 
 
 Route::get('/img-categories/{filename}', function ($filename) {
     $path = storage_path('app/public/categories/' . $filename);
@@ -128,14 +139,50 @@ Route::get('/img-profiles/{filename}', function ($filename) {
 });
 
 Route::get('/img-tshirt-base/{code}', function ($code) {
-    $path = storage_path('app/public/tshirt_base/' . strtoupper($code) . '.png');
-    if (!file_exists($path)) {
-        abort(404);
+    // 1. Limpar e normalizar o código recebido (remover espaços e colocar em minúsculas)
+    $codeClean = strtolower(trim(str_replace('#', '', $code)));
+    
+    // Diretoria física onde estão guardadas as t-shirts base
+    $dir = storage_path('app/public/tshirt_base/');
+    $finalPath = null;
+
+    if (is_dir($dir)) {
+        $files = scandir($dir);
+        
+        // 2. Procura Inteligente por Substring (Aproximação de Texto)
+        // Se o código for 'white', vai fazer correspondência com 'plain_white.png' ou 'white_plain.png'
+        foreach ($files as $file) {
+            if ($file !== '.' && $file !== '..') {
+                $fileLower = strtolower($file);
+                
+                if (str_contains($fileLower, $codeClean)) {
+                    $finalPath = $dir . $file;
+                    break;
+                }
+            }
+        }
     }
-    $file = file_get_contents($path);
-    $type = mime_content_type($path);
+
+    // 3. Failsafe (Salvaguarda): Se não encontrar a cor específica, tenta carregar o modelo branco padrão
+    if (!$finalPath || !file_exists($finalPath)) {
+        foreach (['plain_white.png', 'white.png', 'plain_white.PNG'] as $fallback) {
+            if (file_exists($dir . $fallback)) {
+                $finalPath = $dir . $fallback;
+                break;
+            }
+        }
+    }
+
+    // 4. Se mesmo com a salvaguarda nada for encontrado, lança o erro 404
+    if (!$finalPath || !file_exists($finalPath)) {
+        abort(404, 'Ficheiro base de t-shirt não encontrado na pasta storage.');
+    }
+
+    // 5. Servir a imagem com o cabeçalho correto para o browser renderizar as camadas do CSS
+    $file = file_get_contents($finalPath);
+    $type = mime_content_type($finalPath);
     return response($file, 200)->header("Content-Type", $type);
-});
+})->name('img-tshirt-base');
 
 // --- Rotas Exclusivas do Administrador ---
 Route::middleware(['auth', 'verified'])->group(function () {
@@ -167,6 +214,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
     // G2: Configuração Global de Preços da Loja
     Route::get('/admin/prices', [PriceController::class, 'edit'])->name('admin.prices.edit');
     Route::put('/admin/prices', [PriceController::class, 'update'])->name('admin.prices.update');
+
+    // G8: Painel de Estatísticas do Negócio
+    Route::get('/admin/statistics', [\App\Http\Controllers\Admin\AdminStatsController::class, 'index'])->name('admin.statistics');
 });
 
 // --- Configurações Adicionais e Placeholders ---
