@@ -1,18 +1,22 @@
 <?php
 
-use Illuminate\Support\Facades\Route;
-use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Facades\Response;
-use Illuminate\Foundation\Auth\EmailVerificationRequest;
-use Illuminate\Http\Request;
-use App\Http\Controllers\ColorController;
-use App\Http\Controllers\CategoryController;
+use App\Http\Controllers\AdminUserController;
+use App\Http\Controllers\Admin\OrderManagementController;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\CartController;
+use App\Http\Controllers\CheckoutController;
+use App\Http\Controllers\CategoryController;
+use App\Http\Controllers\ColorController;
+use App\Http\Controllers\OrderController;
+use App\Http\Controllers\PriceController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\TshirtImageController;
-use App\Http\Controllers\AdminUserController;
-use App\Http\Controllers\PriceController;
-use App\Http\Controllers\CartController;
+use App\Livewire\Cart\CartPage;
+use Illuminate\Foundation\Auth\EmailVerificationRequest;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Response;
+use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Storage;
 
 // --- Rotas Públicas da Loja (Acessíveis a visitantes anónimos) ---
 Route::get('/', [TshirtImageController::class, 'index'])->name('home');
@@ -36,12 +40,19 @@ Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
 Route::post('/login', [AuthController::class, 'login'])->name('login.post');
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
-// --- Rotas do Carrinho de Compras --- //
-Route::get('/cart', [CartController::class, 'show'])->name('cart.show');
+// --- Rotas do Carrinho de Compras ---
+// The cart page is a Livewire full-page component for reactive, server-side interactivity.
+Route::livewire('/cart', CartPage::class)->name('cart.show');
 Route::post('/cart/add', [CartController::class, 'add'])->name('cart.add');
 Route::patch('/cart/update/{key}', [CartController::class, 'update'])->name('cart.update');
 Route::delete('/cart/remove/{key}', [CartController::class, 'destroy'])->name('cart.remove');
 Route::delete('/cart/clear', [CartController::class, 'clear'])->name('cart.clear');
+
+// G4: Checkout – requires authentication (anonymous users are redirected to login)
+Route::middleware('auth')->group(function () {
+    Route::get('/checkout', [CheckoutController::class, 'show'])->name('cart.checkout');
+    Route::post('/checkout', [CheckoutController::class, 'store'])->name('cart.checkout.store');
+});
 
 // --- Verificação de E-mail & Reset de Passwords ---
 Route::get('/email/verify', function () {
@@ -77,6 +88,12 @@ Route::middleware(['auth', 'verified'])->group(function () {
     // Perfil do Utilizador
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::put('/profile', [ProfileController::class, 'update'])->name('profile.update');
+
+    // G4: Histórico de Encomendas
+    Route::get('/orders', [OrderController::class, 'index'])->name('orders.index');
+
+    // G6: Download do Recibo em PDF (autorização via OrderPolicy@downloadReceipt)
+    Route::get('/orders/{order}/receipt', [OrderController::class, 'downloadReceipt'])->name('orders.receipt.download');
 });
 
 // --- Sistema de Leitura Direta de Ficheiros ---
@@ -154,4 +171,12 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
 // --- Configurações Adicionais e Placeholders ---
 //Route::view('/cart', 'home')->name('cart.show');
+
+// --- Backoffice de Gestão de Encomendas (Funcionários e Admins) ---
+Route::middleware(['auth', 'verified', 'staff'])->prefix('admin')->name('admin.')->group(function () {
+    Route::get('/orders', [OrderManagementController::class, 'index'])->name('orders.index');
+    Route::patch('/orders/{order}/close', [OrderManagementController::class, 'close'])->name('orders.close');
+    Route::patch('/orders/{order}/cancel', [OrderManagementController::class, 'cancel'])->name('orders.cancel');
+});
+
 require __DIR__ . '/settings.php';

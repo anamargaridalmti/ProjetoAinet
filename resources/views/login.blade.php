@@ -3,7 +3,6 @@
 <head>
     @include('partials.head')
     <script>
-        // Sincronização em tempo real com o localStorage do tema global
         function applySavedTheme() {
             const savedTheme = localStorage.getItem('theme');
             if (savedTheme === 'dark' || (!savedTheme && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
@@ -13,7 +12,6 @@
             }
         }
         applySavedTheme();
-
         document.addEventListener('livewire:navigated', applySavedTheme);
     </script>
 </head>
@@ -24,16 +22,19 @@
             <x-app-logo class="h-12 w-auto" />
         </div>
         <flux:heading size="xl" class="font-bold tracking-tight text-zinc-900 dark:text-white">
-            Criar Conta FunShirt
+            Entrar na FunShirt
         </flux:heading>
         <flux:text class="mt-2 text-sm text-zinc-600 dark:text-zinc-400">
-            Registe-se como cliente para personalizar e encomendar as suas t-shirts.
+            Inicie sessão para continuar as suas compras.
         </flux:text>
     </div>
 
     <div class="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
         <div class="bg-white dark:bg-zinc-900 py-8 px-4 shadow-xl border border-zinc-200/80 dark:border-zinc-800/80 sm:rounded-xl sm:px-10">
-            
+
+            {{-- Status message (e.g. after password reset) --}}
+            <x-auth-session-status class="mb-4" :status="session('status')" />
+
             @if ($errors->any())
                 <div class="mb-4 p-3 bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-900/50 rounded-lg text-sm text-red-600 dark:text-red-400">
                     <ul class="list-disc pl-5 space-y-1">
@@ -44,83 +45,73 @@
                 </div>
             @endif
 
-            <form action="{{ route('register') }}" method="POST" class="space-y-6">
+            <form action="{{ route('login') }}" method="POST" class="space-y-6">
                 @csrf
 
                 <flux:field>
-                    <flux:label for="name">Nome Completo</flux:label>
-                    <flux:input 
-                        type="text" 
-                        name="name" 
-                        id="name" 
-                        value="{{ old('name') }}" 
-                        required 
-                        autofocus 
-                        placeholder="O teu nome completo"
-                        icon="user"
-                    />
-                </flux:field>
-
-                <flux:field>
                     <flux:label for="email">Endereço de Email</flux:label>
-                    <flux:input 
-                        type="email" 
-                        name="email" 
-                        id="email" 
-                        value="{{ old('email') }}" 
-                        required 
+                    <flux:input
+                        type="email"
+                        name="email"
+                        id="email"
+                        value="{{ old('email') }}"
+                        required
+                        autofocus
                         placeholder="exemplo@mail.pt"
                         icon="envelope"
                     />
                 </flux:field>
 
                 <flux:field>
-                    <flux:label for="password">Palavra-passe (mínimo 8 caracteres)</flux:label>
-                    <flux:input 
-                        type="password" 
-                        name="password" 
-                        id="password" 
-                        required 
+                    <div class="flex items-center justify-between">
+                        <flux:label for="password">Palavra-passe</flux:label>
+                        @if (Route::has('password.request'))
+                            <a href="{{ route('password.request') }}"
+                               class="text-xs text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-300">
+                                Esqueceu a palavra-passe?
+                            </a>
+                        @endif
+                    </div>
+                    <flux:input
+                        type="password"
+                        name="password"
+                        id="password"
+                        required
                         placeholder="••••••••"
                         icon="key"
                     />
                 </flux:field>
 
-                <flux:field>
-                    <flux:label for="password_confirmation">Confirmar Palavra-passe</flux:label>
-                    <flux:input 
-                        type="password" 
-                        name="password_confirmation" 
-                        id="password_confirmation" 
-                        required 
-                        placeholder="••••••••"
-                        icon="check-circle"
-                    />
-                </flux:field>
+                <div class="flex items-center">
+                    <input type="checkbox" name="remember" id="remember"
+                        class="h-4 w-4 rounded border-zinc-300 text-zinc-900 focus:ring-zinc-500">
+                    <label for="remember" class="ml-2 block text-sm text-zinc-600 dark:text-zinc-400">
+                        Lembrar-me neste dispositivo
+                    </label>
+                </div>
 
                 <div>
-                    <flux:button 
-                        type="submit" 
-                        variant="filled" 
+                    <flux:button
+                        type="submit"
+                        variant="filled"
                         class="w-full justify-center bg-zinc-900 hover:bg-zinc-800 text-white dark:bg-white dark:hover:bg-zinc-100 dark:text-zinc-900 font-semibold py-2.5 cursor-pointer"
                     >
-                        Criar a Minha Conta
+                        Entrar
                     </flux:button>
                 </div>
             </form>
 
             <div class="mt-6 pt-6 border-t border-zinc-100 dark:border-zinc-800/80 text-center space-y-3">
                 <p class="text-xs text-zinc-500 dark:text-zinc-400">
-                    Já tem uma conta registada?
+                    Ainda não tem conta?
                 </p>
-                
-                <flux:button 
-                    variant="subtle" 
-                    :href="route('login')" 
-                    wire:navigate 
+                <flux:button
+                    variant="subtle"
+                    :href="route('register')"
+                    wire:navigate
                     class="w-full justify-center text-xs font-semibold"
                 >
-                    Voltar ao Login / Entrar
+                    Criar Conta Gratuita
                 </flux:button>
             </div>
 

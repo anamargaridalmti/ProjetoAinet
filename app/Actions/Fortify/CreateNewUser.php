@@ -4,11 +4,12 @@ namespace App\Actions\Fortify;
 
 use App\Concerns\PasswordValidationRules;
 use App\Concerns\ProfileValidationRules;
+use App\Models\Customer;
 use App\Models\User;
+use Illuminate\Auth\Events\Registered;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 use Laravel\Fortify\Contracts\CreatesNewUsers;
-use Illuminate\Support\Facades\Hash;
-use Illuminate\Auth\Events\Registered;
 
 class CreateNewUser implements CreatesNewUsers
 {
@@ -22,14 +23,23 @@ class CreateNewUser implements CreatesNewUsers
         ])->validate();
 
         $user = User::create([
-            'name' => $input['name'],
-            'email' => $input['email'],
-            'password' => Hash::make($input['password']),
+            'name'      => $input['name'],
+            'email'     => $input['email'],
+            'password'  => Hash::make($input['password']),
             'user_type' => 'C',
-            'gender' => 'M',
-            'blocked' => 0,
+            'gender'    => 'M',
+            'blocked'   => 0,
             'photo_url' => null,
-            'custom' => null,
+            'custom'    => null,
+        ]);
+
+        // Every registered user is a Customer — create the customer profile record.
+        Customer::create([
+            'id'                   => $user->id,
+            'nif'                  => null,
+            'address'              => null,
+            'default_payment_type' => null,
+            'default_payment_ref'  => null,
         ]);
 
         event(new Registered($user));

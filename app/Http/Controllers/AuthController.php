@@ -29,7 +29,17 @@ class AuthController extends Controller
             'password' => ['required'],
         ]);
 
-        if (Auth::attempt($credentials)) {
+        if (Auth::attempt($credentials, $request->boolean('remember'))) {
+            // Reject blocked users immediately
+            if (Auth::user()->blocked) {
+                Auth::logout();
+                $request->session()->invalidate();
+
+                return back()->withErrors([
+                    'email' => 'A sua conta está bloqueada. Contacte o administrador.',
+                ])->onlyInput('email');
+            }
+
             $request->session()->regenerate();
 
             return redirect()->intended(route('catalog.index'));
