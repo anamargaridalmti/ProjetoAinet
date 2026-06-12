@@ -33,7 +33,13 @@
                 </div>
 
                 <div class="flex items-center gap-2 sm:gap-4">
-                    
+
+                    <a href="{{ route('home') }}" wire:navigate class="p-2 text-zinc-500 dark:text-zinc-400 hover:text-zinc-800 dark:hover:text-zinc-200 transition" title="Página Inicial">
+                        <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9.75L12 3l9 6.75V21a.75.75 0 01-.75.75H15a.75.75 0 01-.75-.75v-4.5a.75.75 0 00-.75-.75h-3a.75.75 0 00-.75.75V21a.75.75 0 01-.75.75H3.75A.75.75 0 013 21V9.75z" />
+                        </svg>
+                    </a>
+
                     <a href="#" class="relative p-2 text-zinc-500 dark:text-zinc-400 hover:text-red-500 dark:hover:text-red-400 transition" title="Os Meus Favoritos">
                         <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
@@ -93,8 +99,18 @@
                                     </flux:menu.item>
 
                                     @if($user->user_type === 'C')
+                                        <flux:menu.item :href="route('orders.index')" icon="shopping-bag" wire:navigate class="cursor-pointer">
+                                            As Minhas Encomendas
+                                        </flux:menu.item>
+
                                         <flux:menu.item :href="route('customer.tshirt-images.index')" icon="photo" wire:navigate class="cursor-pointer">
                                             As Minhas Imagens
+                                        </flux:menu.item>
+                                    @endif
+
+                                    @if(in_array($user->user_type, ['F', 'A']))
+                                        <flux:menu.item :href="route('admin.orders.index')" icon="clipboard-document-list" wire:navigate class="cursor-pointer">
+                                            Gestão de Encomendas
                                         </flux:menu.item>
                                     @endif
                                 @endif
@@ -147,6 +163,10 @@
                             </flux:sidebar.item>
                             <flux:sidebar.item :href="route('admin.users.index')" icon="users" :current="request()->routeIs('admin.users.*')" wire:navigate>
                                 Utilizadores
+                            </flux:sidebar.item>
+
+                            <flux:sidebar.item icon="clipboard-document-list" :href="route('admin.orders.index')" :current="request()->routeIs('admin.orders.*')" wire:navigate>
+                                Gestão de Encomendas
                             </flux:sidebar.item>
                             
                             <flux:sidebar.item icon="chart-bar" :href="route('admin.statistics')" :current="request()->routeIs('admin.statistics')" wire:navigate>
