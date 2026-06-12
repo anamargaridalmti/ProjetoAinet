@@ -25,9 +25,9 @@
 
                 <flux:field>
                     <flux:label for="category_id">Categoria</flux:label>
-                    <flux:select name="category_id" id="category_id" placeholder="Nenhuma (Geral)">
+                    <flux:select name="category_id" id="category_id" placeholder="Nenhuma (Geral)" value="{{ old('category_id', $tshirtImage->category_id) }}">
                         @foreach($categories as $category)
-                            <flux:select.option value="{{ $category->id }}" {{ old('category_id', $tshirtImage->category_id) == $category->id ? 'selected' : '' }}>
+                            <flux:select.option value="{{ $category->id }}">
                                 {{ $category->name }}
                             </flux:select.option>
                         @endforeach
